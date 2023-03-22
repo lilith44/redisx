@@ -80,7 +80,7 @@ func (r *Redis) UniqueIdGenerator(key string, expiration time.Duration) easy.Uni
 	return func() int64 {
 		var id int64
 		for {
-			set, err := r.SetNX(context.Background(), addPrefix(r.prefix, fmt.Sprintf("%s_%d", key, id)), "", expiration)
+			set, err := r.SetNX(context.Background(), fmt.Sprintf("%s_%d", key, id), "", expiration)
 			if err != nil {
 				panic(err)
 			}
