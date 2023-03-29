@@ -53,7 +53,7 @@ type value struct {
 	val any
 }
 
-func newValue(val any) any {
+func newSetValue(val any) any {
 	switch val.(type) {
 	case nil, string, []byte, int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
 	case bool, time.Time, time.Duration:
@@ -62,6 +62,17 @@ func newValue(val any) any {
 	}
 
 	return val
+}
+
+func newGetValue(valPtr any) any {
+	switch valPtr.(type) {
+	case *string, *[]byte, *int, *int8, *int16, *int32, *int64, *uint, *uint8, *uint16, *uint32, *uint64, *float32, *float64:
+	case *bool, *time.Time, *time.Duration:
+	default:
+		return &value{val: valPtr}
+	}
+
+	return valPtr
 }
 
 func (v *value) MarshalBinary() ([]byte, error) {
@@ -97,15 +108,15 @@ func (r *Redis) UniqueIdGenerator(key string, expiration time.Duration) easy.Uni
 }
 
 func (r *Redis) Set(ctx context.Context, key string, value any, expiration ...time.Duration) (string, error) {
-	return r.client.Set(ctx, addPrefix(r.prefix, key), newValue(value), parseExpiration(expiration)).Result()
+	return r.client.Set(ctx, addPrefix(r.prefix, key), newSetValue(value), parseExpiration(expiration)).Result()
 }
 
 func (r *Redis) SetNX(ctx context.Context, key string, value any, expiration ...time.Duration) (bool, error) {
-	return r.client.SetNX(ctx, addPrefix(r.prefix, key), newValue(value), parseExpiration(expiration)).Result()
+	return r.client.SetNX(ctx, addPrefix(r.prefix, key), newSetValue(value), parseExpiration(expiration)).Result()
 }
 
 func (r *Redis) Get(ctx context.Context, key string, valuePtr any) error {
-	return r.client.Get(ctx, addPrefix(r.prefix, key)).Scan(newValue(valuePtr))
+	return r.client.Get(ctx, addPrefix(r.prefix, key)).Scan(newGetValue(valuePtr))
 }
 
 func (r *Redis) Del(ctx context.Context, key string) (int64, error) {
@@ -118,14 +129,14 @@ func (r *Redis) IncrBy(ctx context.Context, key string, value int64) (int64, err
 
 func (r *Redis) HSet(ctx context.Context, key string, mapping map[string]any) (int64, error) {
 	for k := range mapping {
-		mapping[k] = newValue(mapping[k])
+		mapping[k] = newSetValue(mapping[k])
 	}
 
 	return r.client.HSet(ctx, addPrefix(r.prefix, key), mapping).Result()
 }
 
 func (r *Redis) HSetNX(ctx context.Context, key string, field string, value any) (bool, error) {
-	return r.client.HSetNX(ctx, addPrefix(r.prefix, key), field, newValue(value)).Result()
+	return r.client.HSetNX(ctx, addPrefix(r.prefix, key), field, newSetValue(value)).Result()
 }
 
 func (r *Redis) HGetAll(ctx context.Context, key string) (map[string]string, error) {
@@ -133,7 +144,7 @@ func (r *Redis) HGetAll(ctx context.Context, key string) (map[string]string, err
 }
 
 func (r *Redis) HGet(ctx context.Context, key string, field string, valuePtr any) error {
-	return r.client.HGet(ctx, addPrefix(r.prefix, key), field).Scan(newValue(valuePtr))
+	return r.client.HGet(ctx, addPrefix(r.prefix, key), field).Scan(newGetValue(valuePtr))
 }
 
 func (r *Redis) HLen(ctx context.Context, key string) (int64, error) {
