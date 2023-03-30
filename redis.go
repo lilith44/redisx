@@ -127,6 +127,10 @@ func (r *Redis) IncrBy(ctx context.Context, key string, value int64) (int64, err
 	return r.client.IncrBy(ctx, addPrefix(r.prefix, key), value).Result()
 }
 
+func (r *Redis) TTL(ctx context.Context, key string) (time.Duration, error) {
+	return r.client.TTL(ctx, addPrefix(r.prefix, key)).Result()
+}
+
 func (r *Redis) HSet(ctx context.Context, key string, mapping map[string]any) (int64, error) {
 	for k := range mapping {
 		mapping[k] = newSetValue(mapping[k])
