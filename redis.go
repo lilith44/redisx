@@ -131,6 +131,10 @@ func (r *Redis) TTL(ctx context.Context, key string) (time.Duration, error) {
 	return r.client.TTL(ctx, addPrefix(r.prefix, key)).Result()
 }
 
+func (r *Redis) Expire(ctx context.Context, key string, duration time.Duration) (bool, error) {
+	return r.client.Expire(ctx, addPrefix(r.prefix, key), duration).Result()
+}
+
 func (r *Redis) HSet(ctx context.Context, key string, mapping map[string]any) (int64, error) {
 	for k := range mapping {
 		mapping[k] = newSetValue(mapping[k])
