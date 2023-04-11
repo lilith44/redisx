@@ -182,3 +182,7 @@ func (r *Redis) ZScore(ctx context.Context, key string, member string) (float64,
 func (r *Redis) ZCard(ctx context.Context, key string) (int64, error) {
 	return r.client.ZCard(ctx, addPrefix(r.prefix, key)).Result()
 }
+
+func (r *Redis) ZRem(ctx context.Context, key string, members ...string) (int64, error) {
+	return r.client.ZRem(ctx, addPrefix(r.prefix, key), easy.ToAnySlice(members)...).Result()
+}
