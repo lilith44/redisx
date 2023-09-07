@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/lilith44/easy"
+	"github.com/lilith44/easy/slicex"
 )
 
 type Redis struct {
@@ -184,5 +185,5 @@ func (r *Redis) ZCard(ctx context.Context, key string) (int64, error) {
 }
 
 func (r *Redis) ZRem(ctx context.Context, key string, members ...string) (int64, error) {
-	return r.client.ZRem(ctx, addPrefix(r.prefix, key), easy.ToAnySlice(members)...).Result()
+	return r.client.ZRem(ctx, addPrefix(r.prefix, key), slicex.ToSliceAny(members)...).Result()
 }
